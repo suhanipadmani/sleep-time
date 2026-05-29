@@ -9,6 +9,15 @@ export class XeroAuthService {
    */
   public async getConsentUrl(): Promise<string> {
     try {
+      
+      try {
+        await xero.initialize();
+        logger.info('Xero successfully initialized!');
+      } catch (initError) {
+        logger.error('Xero initialization failed:', initError);
+        throw initError;
+      }
+
       const consentUrl = await xero.buildConsentUrl();
       return consentUrl;
     } catch (error) {
@@ -22,6 +31,14 @@ export class XeroAuthService {
    */
   public async handleCallback(url: string): Promise<void> {
     try {
+
+      try {
+        await xero.initialize();
+        logger.info('Xero successfully initialized!');
+      } catch (initError) {
+        logger.error('Xero initialization failed:', initError);
+        throw initError;
+      }
       const tokenSet = await xero.apiCallback(url);
       
       // Update tenant
@@ -33,11 +50,11 @@ export class XeroAuthService {
       }
       
       const activeTenant = tenants[0];
-      
       await this.saveTokens(tokenSet, activeTenant.tenantId);
     } catch (error) {
+      console.log("Xero error:", error);
       logger.error('Error handling Xero callback:', error);
-      throw new Error('Failed to authenticate with Xero');
+      throw error;
     }
   }
 
@@ -48,7 +65,6 @@ export class XeroAuthService {
   public async getValidTokenSet(): Promise<void> {
     try {
       const client = await pool.connect();
-      // Assuming a single global organization as per requirements
       const result = await client.query('SELECT * FROM xero_tokens ORDER BY created_at DESC LIMIT 1');
       
       if (result.rowCount === 0) {

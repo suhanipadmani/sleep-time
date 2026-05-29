@@ -17,7 +17,6 @@ export const xeroController = {
       logger.info(`Generated Xero Consent URL: ${consentUrl}`);
       logger.info('------------------');
       
-      // We can either redirect directly, or send the URL for the frontend to handle
       res.redirect(consentUrl);
     } catch (error: any) {
       logger.error('Connect Xero Error:', error);

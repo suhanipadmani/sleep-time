@@ -34,11 +34,4 @@ const startServer = async () => {
   }
 };
 
-if (process.env.NODE_ENV !== 'production' || process.env.RUN_LOCAL === 'true') {
-  startServer();
-} else {
-  // Execute init scripts for serverless environment without blocking the export
-  initDB().then(() => authService.seedAdmin()).catch(console.error);
-}
-
-export default app;
+startServer();

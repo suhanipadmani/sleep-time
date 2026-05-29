@@ -70,6 +70,15 @@ export class XeroInvoiceService {
 
       // 5. Create Invoice in Xero
       logger.info(`Creating Xero invoice for contact ID: ${contact.contactID}`);
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 30); // 30 days from now
+
+      // Ensure line items have an accountCode if missing, '200' is the default Sales account in Xero
+      const formattedLineItems = lineItems.map(item => ({
+        ...item,
+        accountCode: item.accountCode || '200' 
+      }));
+
       const invoiceResponse = await xero.accountingApi.createInvoices(tenantId, {
         invoices: [
           {
@@ -77,7 +86,8 @@ export class XeroInvoiceService {
             contact: {
               contactID: contact.contactID
             },
-            lineItems: lineItems,
+            dueDate: dueDate.toISOString().split('T')[0], 
+            lineItems: formattedLineItems,
             status: Invoice.StatusEnum.AUTHORISED
           }
         ]
